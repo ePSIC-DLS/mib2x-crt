@@ -1,0 +1,164 @@
+from pathlib import Path
+
+import h5py
+
+from .._hierarchical import HierarchicalWriter
+
+version = "3.3"
+
+
+# class HyperspyReader(HierarchicalReader):
+    # _file_type = "hspy"
+    # _is_hdf5 = True
+
+    # def __init__(self, file):
+        # super().__init__(file)
+        # self.Dataset = h5py.Dataset
+        # self.Group = h5py.Group
+
+class HyperspyWriter(HierarchicalWriter):
+    """
+    An object used to simplify and organize the process for
+    writing a hyperspy signal.  (.hspy format)
+    """
+
+    target_size = 1e6
+    _unicode_kwds = {"dtype": h5py.string_dtype()}
+    _is_hdf5 = True
+
+    def __init__(self, file, signal, expg, **kwds):
+        super().__init__(file, signal, expg, **kwds)
+        self.Dataset = h5py.Dataset
+        self.Group = h5py.Group
+
+    @staticmethod
+    def _store_data(data, dset, group, key, chunks, show_progressbar=True):
+        # Tuple of dask arrays can also be passed, in which case the task graphs
+        # are merged and the data is written in a single `da.store` call.
+        # This is useful when saving a ragged array, where we need to write
+        # the data and the shape at the same time as the ragged array must have
+        # only one dimension.
+        if isinstance(data, tuple):
+            data = list(data)
+        elif not isinstance(data, list):
+            data = [
+                data,
+            ]
+            dset = [
+                dset,
+            ]
+
+        for i, (data_, dset_) in enumerate(zip(data, dset)):
+            if data_.flags.c_contiguous and data_.shape != (0,):
+                dset_.write_direct(data_)
+            else:
+                dset_[:] = data_
+
+    @staticmethod
+    def _get_object_dset(group, data, key, chunks, dtype=None, **kwds):
+        """Creates a h5py dataset object for saving ragged data"""
+        if chunks is None:  # pragma: no cover
+            chunks = 1
+
+        if dtype is None:
+            test_data = data[data.ndim * (0,)]
+            dtype = test_data.dtype
+
+        dset = group.require_dataset(
+            key, data.shape, dtype=h5py.vlen_dtype(dtype), chunks=chunks, **kwds
+        )
+        return dset
+
+
+def file_reader(filename, lazy=False, **kwds):
+    pass
+
+
+def file_writer(
+    filename,
+    signal,
+    chunks=None,
+    compression="gzip",
+    close_file=True,
+    write_dataset=True,
+    show_progressbar=True,
+    **kwds,
+):
+    """
+    Write data to HyperSpy's hdf5-format (``.hspy``).
+
+    Parameters
+    ----------
+    %s
+    %s
+    %s
+    %s
+    close_file : bool, default=True
+        Close the file after writing.  The file should not be closed if the data
+        needs to be accessed lazily after saving.
+    write_dataset : bool, default=True
+        If True, write the dataset, otherwise, don't write it. Useful to
+        overwrite attributes (for example ``axes_manager``) only without having
+        to write the whole dataset.
+    %s
+    **kwds
+        The keyword argument are passed to the
+        :external+h5py:meth:`h5py.Group.require_dataset` function.
+
+    Notes
+    -----
+    %s
+    """
+    if not isinstance(write_dataset, bool):
+        raise ValueError("`write_dataset` argument has to be a boolean.")
+
+    if "shuffle" not in kwds:
+        # Use shuffle by default to improve compression
+        kwds["shuffle"] = True
+
+    folder = signal["tmp_parameters"].get("original_folder", "")
+    fname = signal["tmp_parameters"].get("original_filename", "")
+    ext = signal["tmp_parameters"].get("original_extension", "")
+    original_path = Path(folder, f"{fname}.{ext}")
+
+    f = None
+
+    if f is None:
+        # with "write_dataset=False", we need mode='a', otherwise the dataset
+        # will be flushed with using 'w' mode
+        mode = kwds.get("mode", "w" if write_dataset else "a")
+        if mode != "a" and not write_dataset:
+            raise ValueError("`mode='a'` is required to use " "`write_dataset=False`.")
+        f = h5py.File(filename, mode=mode)
+
+    f.attrs["file_format"] = "HyperSpy"
+    f.attrs["file_format_version"] = version
+    exps = f.require_group("Experiments")
+    title = signal["metadata"]["General"]["title"]
+    group_name = title if title else "__unnamed__"
+    # / is a invalid character, see https://github.com/hyperspy/hyperspy/issues/942
+    if "/" in group_name:
+        group_name = group_name.replace("/", "-")
+    expg = exps.require_group(group_name)
+
+    writer = HyperspyWriter(
+        f,
+        signal,
+        expg,
+        chunks=chunks,
+        compression=compression,
+        write_dataset=write_dataset,
+        show_progressbar=show_progressbar,
+        **kwds,
+    )
+    # Use try, except, finally to close file when an error is raised
+    try:
+        writer.write()
+    except BaseException as err:
+        raise err
+    finally:
+        if close_file:
+            f.close()
+
+
+overwrite_dataset = HyperspyWriter.overwrite_dataset

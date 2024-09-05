@@ -1,0 +1,15 @@
+**/__pycache__/
+**/*.py[cod]
+**/.ipynb_checkpoints
+**/build/
+**/dist/
+*.egg-info/
+.eggs/
+.env
+.venv/
+.cache
+**/.git/
+**/.gitignore
+**/.pytest_cache
+**/*.md
+hspy_stripped/src/tests/
