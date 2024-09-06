@@ -36,7 +36,8 @@ main() {
         --nodocs -y \
         python3.12 \
         libgomp \
-        libstdc++
+        libstdc++ \
+        libjpeg
     dnf clean all --installroot "${micromount}"
 
     # unmount container's root file system
