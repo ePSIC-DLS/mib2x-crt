@@ -66,13 +66,19 @@ RUN cd hdf5-${HDF5_VERSION} \
     #.. \
     #&& make -j$(nproc) && make install
 
+# remove other hdf5plugin filter after installation, only need h5blosc
+# silent log when fail to initialise other filters
 RUN python3.12 -m pip install \
     numpy \
     blosc \
     && HDF5_DIR='/usr/local' \
     python3.12 -m pip install \
     --no-binary=h5py --no-build-isolation \
-    h5py
+    h5py hdf5plugin \
+    && find /usr/local/lib64/python3.12/site-packages/hdf5plugin/plugins/ \
+       -type f -not -name "libh5blosc.so" -exec rm {} + \
+    && sed -i '/Cannot initialize filter/s/^/#/' \
+       /usr/local/lib64/python3.12/site-packages/hdf5plugin/_utils.py
 
 # build mib_props C extension
 RUN git clone https://github.com/ePSIC-DLS/mib_props.git \
