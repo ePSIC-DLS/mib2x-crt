@@ -167,8 +167,10 @@ class BaseSignal:
         if "metadata" not in file_data_dict:
             file_data_dict["metadata"] = {}
         else:
+            # no hspy object from metadata
+            pass
             # Get all hspy object back from their dictionary representation
-            _obj_in_dict2hspy(file_data_dict["metadata"], lazy=self._lazy)
+            # _obj_in_dict2hspy(file_data_dict["metadata"], lazy=self._lazy)
         if "original_metadata" not in file_data_dict:
             file_data_dict["original_metadata"] = {}
 
