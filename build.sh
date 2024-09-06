@@ -63,10 +63,10 @@ main() {
         import_test.py /home/ruska/
 
     # set config
+    # not set user as 'ruska' for flexibility
     buildah config \
         --author='Timothy Poon (timothy.poon@diamond.ac.uk)' \
         --workingdir='/home/ruska' \
-        --user='ruska' \
         "${microcontainer}"
 
     # save the image
