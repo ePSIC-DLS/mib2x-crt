@@ -67,6 +67,7 @@ main() {
     # not set user as 'ruska' for flexibility
     buildah config \
         --author='Timothy Poon (timothy.poon@diamond.ac.uk)' \
+        --env PYTHONUNBUFFERED=1 \
         --workingdir='/home/ruska' \
         "${microcontainer}"
 
