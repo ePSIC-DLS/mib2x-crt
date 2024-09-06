@@ -16,7 +16,6 @@ RUN dnf install --disablerepo="*" \
     wget \
     tar \
     zlib-devel \
-    util-linux \
     git-core \
     python3.12 \
     python3.12-pip \
@@ -92,7 +91,7 @@ COPY hspy_stripped hspy_stripped
 RUN python3.12 -m pip install ./hspy_stripped
 
 # add a non-root user
-RUN adduser --user-group --create-home ruska
+RUN useradd --user-group --create-home ruska
 
 
 #===============================================================================
