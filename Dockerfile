@@ -2,6 +2,7 @@ FROM redhat/ubi8:latest as builder
 
 ENV PIP_NO_CACHE_DIR=1 \
     HDF5_VERSION='1.14.3' \
+    NUMPY_VERSION='2.1.1' \
     MIB_PROPS_VERSION='1.0.1'
 
 RUN dnf install --disablerepo="*" \
@@ -66,10 +67,19 @@ RUN cd hdf5-${HDF5_VERSION} \
     #.. \
     #&& make -j$(nproc) && make install
 
+# numpy without blas
+RUN git clone https://github.com/numpy/numpy.git \
+    && cd numpy \
+    && git switch --detach v"${NUMPY_VERSION}" \
+    && git submodule update --init \
+    && python3.12 -m pip install . -v \
+       -Csetup-args="-Dblas=none" \
+       -Csetup-args="-Dlapack=none" \
+       -Csetup-args="-Dallow-noblas=true"
+
 # remove other hdf5plugin filter after installation, only need h5blosc
 # silent log when fail to initialise other filters
 RUN python3.12 -m pip install \
-    numpy \
     blosc \
     && HDF5_DIR='/usr/local' \
     python3.12 -m pip install \
