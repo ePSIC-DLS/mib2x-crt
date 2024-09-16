@@ -18,6 +18,7 @@ RUN dnf install --disablerepo="*" \
     tar \
     zlib-devel \
     git-core \
+    libjpeg-devel \
     python3.12 \
     python3.12-pip \
     python3.12-wheel \
@@ -89,6 +90,21 @@ RUN python3.12 -m pip install \
        -type f -not -name "libh5blosc.so" -exec rm {} + \
     && sed -i '/Cannot initialize filter/s/^/#/' \
        /usr/local/lib64/python3.12/site-packages/hdf5plugin/_utils.py
+
+# PIL with jpeg support
+RUN python3.12 -m pip install --no-binary=Pillow Pillow \
+    -C parallel=$(nproc) \
+    -C zlib=disable \
+    -C jpeg=enable \
+    -C tiff=disable \
+    -C freetype=disable \
+    -C raqm=disable \
+    -C lcms=disable \
+    -C webp=disable \
+    -C webpmux=disable \
+    -C jpeg2000=disable \
+    -C imagequant=disable \
+    -C xcb=disable
 
 # build mib_props C extension
 RUN git clone https://github.com/ePSIC-DLS/mib_props.git \
