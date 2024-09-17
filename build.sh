@@ -61,7 +61,7 @@ main() {
 
     # executing script
     buildah copy --chown=ruska --chmod=644 "${microcontainer}" \
-        import_test.py mib_convert.py UserExampleJson.json /home/ruska/
+        mib_convert.py UserExampleJson.json /home/ruska/
 
     # set config
     # not set user as 'ruska' for flexibility

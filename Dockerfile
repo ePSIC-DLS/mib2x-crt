@@ -151,7 +151,7 @@ COPY --from=builder /etc/group /etc/group
 
 COPY --from=builder /home/ruska /home/ruska
 
-COPY --chown=ruska --chmod=644 import_test.py mib_convert.py UserExampleJson.json /home/ruska/
+COPY --chown=ruska --chmod=644 mib_convert.py UserExampleJson.json /home/ruska/
 
 ENV PYTHONUNBUFFERED=1
 
