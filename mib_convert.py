@@ -408,7 +408,7 @@ def write_vds(source_h5_path, writing_h5_path, entry_key='Experiments/__unnamed_
             return
 
         layout = h5py.VirtualLayout(shape=tuple((np.prod(sh[:2]), sh[-2], sh[-1])), dtype = np.uint16)
-        for i, j in product(sh[0], sh[1]):
+        for i, j in product(range(sh[0]), range(sh[1])):
             layout[i * sh[1] + j] = vsource[i, j, :, :]
 
         with h5py.File(writing_h5_path, 'w', libver='latest') as f:
@@ -430,7 +430,7 @@ def write_vds(source_h5_path, writing_h5_path, entry_key='Experiments/__unnamed_
             return
 
         layout = h5py.VirtualLayout(shape=tuple((np.prod(sh[:2]), sh[-2], sh[-1])), dtype = np.uint16)
-        for i, j in product(sh[0], sh[1]):
+        for i, j in product(range(sh[0]), range(sh[1])):
             layout[i * sh[1] + j] = vsource[i, j, :, :]
         logger.debug('Adding vds to: ' + os.path.join(dest_path, os.path.basename(metadata_path)))
         with h5py.File(os.path.join(dest_path, os.path.basename(metadata_path)), 'r+', libver='latest') as f:
