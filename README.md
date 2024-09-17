@@ -41,3 +41,43 @@ To have an interactive shell of the container, you can do
 ```console
 podman run --rm -it localhost/mib2x:latest sh
 ```
+
+## Perform MIB conversion
+
+To perform the MIB conversion, you can do
+
+```console
+podman run --rm -v <VISIT>:<VISIT> localhost/mib2x python mib_convert.py
+"$(cat request.json)"
+```
+
+The `-v` flag mounts the visit on the container. For example if you want to
+convert `.mib` file in `/dls/e02/data/2024/cm37231-4/`:
+
+```console
+podman run --rm -v /dls/e02/data/2024/cm37231-4/:/dls/e02/data/2024/cm37231-4/
+localhost/mib2x python mib_convert.py "$(cat request.json)"
+```
+
+The script `mib_convert.py` takes a single argument which is a json blob
+with all the necessary information. The above `request.json` file could look
+like:
+
+```json
+{
+  "mib_path": "/dls/e02/data/2024/cm37231-4/Merlin/WS2_n_fred_40um/20240821_150039/20240821_150035_data.mib",
+  "no_reshaping": 0,
+  "use_fly_back": 1,
+  "known_shape": 0,
+  "Scan_X": 256,
+  "Scan_Y": 256,
+  "iBF": 1,
+  "bin_sig_flag": 1,
+  "bin_sig_factor": 4,
+  "bin_nav_flag": 1,
+  "bin_nav_factor": 4,
+  "create_json": 1,
+  "ptycho_config": "",
+  "ptycho_template": ""
+}
+```
