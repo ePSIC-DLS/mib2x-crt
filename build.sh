@@ -17,7 +17,7 @@ set -ex
 
 main() {
     # install and build everything using podman
-    podman build --target builder -t mib2x-builder .
+    podman build --format docker --target builder -t mib2x-builder .
 
     # pull the ubi micro image
     microcontainer=$(buildah from redhat/ubi8-micro:latest)
@@ -72,7 +72,7 @@ main() {
         "${microcontainer}"
 
     # save the image
-    buildah commit $microcontainer mib2x
+    buildah commit --format docker $microcontainer mib2x
 }
 
 main $@

@@ -25,7 +25,7 @@ larger as the final base image has the package manager installed. This uses the
 `Dockerfile` to build the image:
 
 ```console
-podman build -t mib2x .
+podman build --format docker -t mib2x .
 ```
 
 ## Launch the container
