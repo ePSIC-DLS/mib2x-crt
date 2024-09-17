@@ -125,34 +125,34 @@ RUN python3.12 -m pip install ./hspy_stripped
 # add a non-root user
 RUN useradd --user-group --create-home ruska
 
-
 #===============================================================================
-#FROM redhat/ubi8-minimal:latest
+FROM redhat/ubi8-minimal:latest
 
-#RUN microdnf install --disablerepo="*" \
-    #--enablerepo="ubi-8-baseos-rpms" \
-    #--enablerepo="ubi-8-appstream-rpms" \
-    #--enablerepo="ubi-8-codeready-builder-rpms" -y \
-    #--nodocs \
-    #python3.12 \
-    #libgomp \
-    #&& microdnf clean all \
-    #&& rm -rf /usr/share/doc /usr/share/man /usr/share/info
+RUN microdnf install --disablerepo="*" \
+    --enablerepo="ubi-8-baseos-rpms" \
+    --enablerepo="ubi-8-appstream-rpms" \
+    --enablerepo="ubi-8-codeready-builder-rpms" \
+    --setopt install_weak_deps=false \
+    --nodocs -y \
+    python3.12 \
+    libgomp \
+    libstdc++ \
+    libjpeg \
+    && microdnf clean all \
+    && rm -rf /usr/share/doc /usr/share/man /usr/share/info
 
-#COPY --from=builder /usr/local /usr/local
+COPY --from=builder /usr/local /usr/local
 
-#COPY --from=builder /opt/mib_props/*.so /opt/fast_bin_stash/*.so /usr/local/lib/python3.12/site-packages/
+COPY --from=builder /opt/mib_props/*.so /opt/fast_bin_stash/*.so /usr/local/lib/python3.12/site-packages/
 
-#COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /etc/passwd /etc/passwd
 
-#COPY --from=builder /etc/group /etc/group
+COPY --from=builder /etc/group /etc/group
 
-#COPY --from=builder /home/ruska /home/ruska
+COPY --from=builder /home/ruska /home/ruska
 
-#COPY --chown=ruska --chmod=644 import_test.py /home/ruska/
+COPY --chown=ruska --chmod=644 import_test.py mib_convert.py UserExampleJson.json /home/ruska/
 
-#USER ruska
+ENV PYTHONUNBUFFERED=1
 
-#WORKDIR /home/ruska
-
-#ENTRYPOINT ["python3.12", "import_test.py"]
+WORKDIR /home/ruska
