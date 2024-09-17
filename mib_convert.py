@@ -464,12 +464,12 @@ def gen_config(template_path, dest_path, config_name, meta_file_path, rotation_a
         meta_values = microscope_meta['metadata']
         pty_expt['process']['common']['scan']['N'] = [int(meta_values['4D_shape'][:2][0]),
                                                       int(meta_values['4D_shape'][:2][1])]
-        pty_expt['process']['common']['source']['energy'] = [float(np.array(meta_values['ht_value(V)']))]
-        pty_expt['process']['common']['scan']['dR'] = [float(np.array(meta_values['step_size(m)'])),
-                                                       float(np.array(meta_values['step_size(m)']))]
+        pty_expt['process']['common']['source']['energy'] = [float(meta_values['ht_value(V)'][()])]
+        pty_expt['process']['common']['scan']['dR'] = [float(meta_values['step_size(m)'][()]),
+                                                       float(meta_values['step_size(m)'][()])]
         # pty_expt['experiment']['optics']['lens']['alpha'] = 2 * float(np.array(meta_values['convergence_semi-angle(rad)']))
-        pty_expt['experiment']['optics']['lens']['defocus'] = [float(np.array(meta_values['defocus(nm)']) * 1e-9),
-                                                               float(np.array(meta_values['defocus(nm)']) * 1e-9)]
+        pty_expt['experiment']['optics']['lens']['defocus'] = [float(meta_values['defocus(nm)'][()] * 1e-9),
+                                                               float(meta_values['defocus(nm)'][()] * 1e-9)]
         pty_expt['process']['save_prefix'] = config_name
 
     with open(config_file, 'w') as f:
