@@ -10,6 +10,7 @@ import blosc
 import h5py
 from  hdf5plugin import Blosc
 import numpy as np
+from PIL import Image
 from hspy_stripped.signal import BaseSignal, Signal2D
 
 # C extensions
@@ -1013,8 +1014,9 @@ def main():
                 ibf = ibf * (255 / ibf.max())
             ibf = ibf.astype(np.uint8)
 
-            s_ibf = Signal2D(ibf)
-            s_ibf.save(ibf_path, overwrite=True)
+            im_ibf = Image.fromarray(ibf)
+            im_ibf.save(ibf_path)
+
         # save binned array across the navigation axes (first 2)
         if bin_nav_flag:
             # although not streaming the chunk, using HyperSpy save
