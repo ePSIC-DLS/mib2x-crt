@@ -592,7 +592,7 @@ def main():
 
     m2x_debug = os.getenv("M2X_DEBUG", "").lower()
     if (m2x_debug in ("true", "on") or
-        (m2x_debug.isdigit() and int(debug) != 0)):
+        (m2x_debug.isdigit() and int(m2x_debug) != 0)):
         tmp_save.append('debug')
 
     tmp_save.extend(adr_split[6:8])
