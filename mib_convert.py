@@ -589,6 +589,12 @@ def main():
     tmp_save.append('/')
     tmp_save.extend(adr_split[1:6])
     tmp_save.append('processing')
+
+    m2x_debug = os.getenv("M2X_DEBUG", "").lower()
+    if (m2x_debug in ("true", "on") or
+        (m2x_debug.isdigit() and int(debug) != 0)):
+        tmp_save.append('debug')
+
     tmp_save.extend(adr_split[6:8])
     save_dir = os.path.join(*tmp_save)
 
