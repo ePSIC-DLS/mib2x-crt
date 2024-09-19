@@ -59,6 +59,11 @@ podman run --rm -v /dls/e02/data/2024/cm37231-4/:/dls/e02/data/2024/cm37231-4/
 localhost/mib2x python mib_convert.py "$(cat request.json)"
 ```
 
+If you want to run in debug mode, you can set the environment variable
+`M2X_DEBUG` to 1 by using `-e 'M2X_DEBUG=1'` when you use `podman run`. This
+will save the output file under `<VISIT>/processing/debug/` instead of
+`<VISIT>/processing`.
+
 The script `mib_convert.py` takes a single argument which is a json blob
 with all the necessary information. The above `request.json` file could look
 like:
