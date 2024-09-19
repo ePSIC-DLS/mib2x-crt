@@ -67,6 +67,7 @@ main() {
     # not set user as 'ruska' for flexibility
     buildah config \
         --author='Timothy Poon (timothy.poon@diamond.ac.uk)' \
+        --label description='This image converts a .mib file to .hdf5/.hspy alongside other processing such as pixel binning at ePSIC in Diamond Light Source. To build the container, see https://github.com/ePSIC-DLS/mib2x-crt' \
         --env PYTHONUNBUFFERED=1 \
         --workingdir='/home/ruska' \
         "${microcontainer}"

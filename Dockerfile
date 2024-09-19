@@ -155,4 +155,6 @@ COPY --chown=ruska --chmod=644 mib_convert.py UserExampleJson.json /home/ruska/
 
 ENV PYTHONUNBUFFERED=1
 
+LABEL description='This image converts a .mib file to .hdf5/.hspy alongside other processing such as pixel binning at ePSIC in Diamond Light Source. To build the container, see https://github.com/ePSIC-DLS/mib2x-crt'
+
 WORKDIR /home/ruska
