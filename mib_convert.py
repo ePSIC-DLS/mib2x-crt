@@ -645,8 +645,8 @@ def main():
     except (KeyError, ValueError):
         # leave it as default, i.e. the maximum detected number
         blosc_nthreads = blosc.detect_number_of_cores()
-        blosc.set_nthreads(blosc_nthreads)
-        print(f"Blosc number of threads: {blosc_nthreads}")
+    blosc.set_nthreads(blosc_nthreads)
+    print(f"Blosc number of threads: {blosc_nthreads}")
 
     # fetch all useful information from the headers in the mib file
     mib_properties = mib_props(mib_path,
