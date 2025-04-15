@@ -71,8 +71,9 @@ like:
 ```json
 {
   "mib_path": "/dls/e02/data/2024/cm37231-4/Merlin/WS2_n_fred_40um/20240821_150039/20240821_150035_data.mib",
+  "auto_reshape": 1,
   "no_reshaping": 0,
-  "use_fly_back": 1,
+  "use_fly_back": 0,
   "known_shape": 0,
   "Scan_X": 256,
   "Scan_Y": 256,
