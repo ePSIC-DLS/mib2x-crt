@@ -453,12 +453,18 @@ def gen_config(template_path, dest_path, config_name, meta_file_path, rotation_a
     pty_expt['base_dir'] = dest_path
     pty_expt['process']['save_dir'] = dest_path
     pty_expt['experiment']['data']['data_path'] = data_path
+    pty_expt['experiment']['experiment_ID'] = config_name
 
     pty_expt['process']['common']['scan']['rotation'] = rotation_angle
 
     # pty_expt['process']['common']['scan']['N'] = scan_shape
     pty_expt['experiment']['detector']['position'] = [0, 0, camera_length]
     pty_expt['experiment']['optics']['lens']['alpha'] = conv_angle
+
+    #edit the json in order to perform auto ptycho
+    pty_expt['process']['common']['scan']['region'] = [0.0,1.0,0.0,1.0,1,1]
+    pty_expt['process']['PIE']['MultiSlice']['slices'] = 1
+    pty_expt['process']['PIE']['iterations'] = 25
 
     with h5py.File(meta_file_path, 'r') as microscope_meta:
         meta_values = microscope_meta['metadata']
@@ -500,7 +506,7 @@ def Meta2Config(acc,nCL,aps):
         else:
             print('the aperture being used has unknwon convergence semi angle please consult confluence page or collect calibration data')
     elif acc == 200e3:
-        rot_angle = 90
+        rot_angle = -77.585
         print('Rotation angle = ' + str(rot_angle) +' Warning: This rotation angle need further calibration')
         if aps == 1:
             conv_angle = 37.7e-3
@@ -555,6 +561,7 @@ def main():
     args = json.loads(sys.argv[1])
 
     mib_path = args['mib_path']
+    auto_reshape = args['auto_reshape']
     no_reshaping = args['no_reshaping']
     use_fly_back = args['use_fly_back']
     known_shape = args['known_shape']
@@ -619,8 +626,9 @@ def main():
     print('**********')
 
     # check provided reshaping options
-    if sum([bool(no_reshaping), bool(use_fly_back), bool(known_shape)]) != 1:
-        msg = (f"Only one of the options 'no_reshaping' ({no_reshaping}), "
+    if sum([bool(auto_reshape), bool(no_reshaping), bool(use_fly_back), bool(known_shape)]) != 1:
+        msg = (f"Only one of the options 'auto_reshape' ({auto_reshape}), "
+               f"'no_reshaping' ({no_reshaping}), or "
                f"'use_fly_back' ({use_fly_back}) or 'known_shape' "
                f"({known_shape}) should be True.")
         raise ValueError(msg)
@@ -664,6 +672,56 @@ def main():
                            exposure_time_ns=True,
                            bit_depth=True,
                            )
+
+    if auto_reshape:
+        if mib_properties['sequence_number'][-1] == 262144:
+            no_reshaping = False
+            use_fly_back = True
+            known_shape = False
+            print("Going to use the 'Fly-back' option")
+            print("The scan shape will be 512*512")
+        elif mib_properties['sequence_number'][-1] == 261632:
+            no_reshaping = False
+            use_fly_back = False
+            known_shape = True
+            Scan_X = 512
+            Scan_Y = 511
+            print("Going to use the 'known_shape' option")
+            print("The scan shape will be 512*511")
+        elif mib_properties['sequence_number'][-1] == 65536:
+            no_reshaping = False
+            use_fly_back = True
+            known_shape = False
+            print("Going to use the 'Fly-back' option")
+            print("The scan shape will be 256*256")
+        elif mib_properties['sequence_number'][-1] == 65280:
+            no_reshaping = False
+            use_fly_back = False
+            known_shape = True
+            Scan_X = 256
+            Scan_Y = 255
+            print("Going to use the 'known_shape' option")
+            print("The scan shape will be 256*255")
+        elif mib_properties['sequence_number'][-1] == 16384:
+            no_reshaping = False
+            use_fly_back = True
+            known_shape = False
+            print("Going to use the 'Fly-back' option")
+            print("The scan shape will be 128*128")
+        elif mib_properties['sequence_number'][-1] == 16256:
+            no_reshaping = False
+            use_fly_back = False
+            known_shape = True
+            Scan_X = 128
+            Scan_Y = 127
+            print("Going to use the 'known_shape' option")
+            print("The scan shape will be 128*127")
+        else:
+            no_reshaping = True
+            use_fly_back = False
+            known_shape = False
+            print("A proper scan shape was not detected")
+            print("The scan shape will be %d*1"%(mib_properties['sequence_number'][-1]))
 
     # check the size of the detector to determine whether or not to add a cross
     if mib_properties['det_x'][0] == 256:
