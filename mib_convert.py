@@ -561,6 +561,7 @@ def main():
     args = json.loads(sys.argv[1])
 
     mib_path = args['mib_path']
+    auto_reshape = args['auto_reshape']
     no_reshaping = args['no_reshaping']
     use_fly_back = args['use_fly_back']
     known_shape = args['known_shape']
@@ -625,8 +626,9 @@ def main():
     print('**********')
 
     # check provided reshaping options
-    if sum([bool(no_reshaping), bool(use_fly_back), bool(known_shape)]) != 1:
-        msg = (f"Only one of the options 'no_reshaping' ({no_reshaping}), "
+    if sum([bool(auto_reshape), bool(no_reshaping), bool(use_fly_back), bool(known_shape)]) != 1:
+        msg = (f"Only one of the options 'auto_reshape' ({auto_reshape}), "
+               f"'no_reshaping' ({no_reshaping}), or "
                f"'use_fly_back' ({use_fly_back}) or 'known_shape' "
                f"({known_shape}) should be True.")
         raise ValueError(msg)
