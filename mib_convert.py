@@ -673,6 +673,56 @@ def main():
                            bit_depth=True,
                            )
 
+    if auto_reshape:
+        if mib_properties['sequence_number'][-1] == 262144:
+            no_reshaping = False
+            use_fly_back = True
+            known_shape = False
+            print("Going to use the 'Fly-back' option")
+            print("The scan shape will be 512*512")
+        elif mib_properties['sequence_number'][-1] == 261632:
+            no_reshaping = False
+            use_fly_back = False
+            known_shape = True
+            Scan_X = 512
+            Scan_Y = 511
+            print("Going to use the 'known_shape' option")
+            print("The scan shape will be 512*511")
+        elif mib_properties['sequence_number'][-1] == 65536:
+            no_reshaping = False
+            use_fly_back = True
+            known_shape = False
+            print("Going to use the 'Fly-back' option")
+            print("The scan shape will be 256*256")
+        elif mib_properties['sequence_number'][-1] == 65280:
+            no_reshaping = False
+            use_fly_back = False
+            known_shape = True
+            Scan_X = 256
+            Scan_Y = 255
+            print("Going to use the 'known_shape' option")
+            print("The scan shape will be 256*255")
+        elif mib_properties['sequence_number'][-1] == 16384:
+            no_reshaping = False
+            use_fly_back = True
+            known_shape = False
+            print("Going to use the 'Fly-back' option")
+            print("The scan shape will be 128*128")
+        elif mib_properties['sequence_number'][-1] == 16256:
+            no_reshaping = False
+            use_fly_back = False
+            known_shape = True
+            Scan_X = 128
+            Scan_Y = 127
+            print("Going to use the 'known_shape' option")
+            print("The scan shape will be 128*127")
+        else:
+            no_reshaping = True
+            use_fly_back = False
+            known_shape = False
+            print("A proper scan shape was not detected")
+            print("The scan shape will be %d*1"%(mib_properties['sequence_number'][-1]))
+
     # check the size of the detector to determine whether or not to add a cross
     if mib_properties['det_x'][0] == 256:
         print("Single-Medipix 4DSTEM data - No cross added")
