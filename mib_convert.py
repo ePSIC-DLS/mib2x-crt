@@ -453,12 +453,18 @@ def gen_config(template_path, dest_path, config_name, meta_file_path, rotation_a
     pty_expt['base_dir'] = dest_path
     pty_expt['process']['save_dir'] = dest_path
     pty_expt['experiment']['data']['data_path'] = data_path
+    pty_expt['experiment']['experiment_ID'] = config_name
 
     pty_expt['process']['common']['scan']['rotation'] = rotation_angle
 
     # pty_expt['process']['common']['scan']['N'] = scan_shape
     pty_expt['experiment']['detector']['position'] = [0, 0, camera_length]
     pty_expt['experiment']['optics']['lens']['alpha'] = conv_angle
+
+    #edit the json in order to perform auto ptycho
+    pty_expt['process']['common']['scan']['region'] = [0.0,1.0,0.0,1.0,1,1]
+    pty_expt['process']['PIE']['MultiSlice']['slices'] = 1
+    pty_expt['process']['PIE']['iterations'] = 25
 
     with h5py.File(meta_file_path, 'r') as microscope_meta:
         meta_values = microscope_meta['metadata']
