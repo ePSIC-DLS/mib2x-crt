@@ -9,7 +9,7 @@ RUN dnf install --disablerepo="*" \
     --enablerepo="ubi-8-baseos-rpms" \
     --enablerepo="ubi-8-appstream-rpms" \
     --enablerepo="ubi-8-codeready-builder-rpms" \
-    --setopt install_weak_deps=false \
+    --setopt=install_weak_deps=0 \
     --nodocs -y \
     gcc \
     gcc-c++ \
