@@ -49,7 +49,13 @@ jobs:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+            org.opencontainers.image.title=mib2x
+            org.opencontainers.image.description=This image converts a .mib file to .hdf5/.hspy alongside other processing such as pixel binning at ePSIC in Diamond Light Source
+            org.opencontainers.image.vendor=ePSIC
+            org.opencontainers.image.authors=https://github.com/ePSIC-DLS
+            org.opencontainers.image.documentation=https://github.com/ePSIC-DLS/mib2x-crt
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
