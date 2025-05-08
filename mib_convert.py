@@ -723,20 +723,10 @@ def main():
     bin_nav_path = os.path.join(save_path, f'{time_stamp}_data_bin_nav_factor_{bin_nav_factor}.hspy')
     bin_sig_path = os.path.join(save_path, f'{time_stamp}_data_bin_sig_factor_{bin_sig_factor}.hspy')
 
-
     # check provided reshaping options
     print('**********')
-    print(no_reshaping, use_fly_back, known_shape)
+    print(auto_reshape, no_reshaping, use_fly_back, known_shape)
     print('**********')
-
-    # check provided reshaping options
-    if sum([bool(auto_reshape), bool(no_reshaping), bool(use_fly_back), bool(known_shape)]) != 1:
-        msg = (f"Only one of the options 'auto_reshape' ({auto_reshape}), "
-               f"'no_reshaping' ({no_reshaping}), or "
-               f"'use_fly_back' ({use_fly_back}) or 'known_shape' "
-               f"({known_shape}) should be True.")
-        raise ValueError(msg)
-
 
     # the Blosc filter registered ID (for h5py)
     compression_id = 32001
