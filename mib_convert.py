@@ -1,3 +1,4 @@
+import argparse
 from itertools import product
 import json
 import logging
@@ -47,6 +48,111 @@ PIXEL_DEPTH_NPY_TYPE_PROMOTED = {"U01": np.uint8,
                                  "U32": np.uint64,
                                  "U64": np.uint64,
                                  }
+
+def parse_args():
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(description="Convert MIB files to hdf5")
+
+    # required arguments
+    parser.add_argument(
+        "--mib-path",
+        type=str,
+        required=True,
+        help="path to the MIB file",
+    )
+
+    # mutually exclusive reshaping options
+    reshape_group = parser.add_mutually_exclusive_group()
+    reshape_group.add_argument(
+        "--auto-reshape",
+        dest="reshape_mode",
+        action="store_const",
+        const="auto",
+        help="enable auto reshaping (default: True)",
+    )
+    reshape_group.add_argument(
+        "--no-reshaping",
+        dest="reshape_mode",
+        action="store_const",
+        const="no-reshape",
+        help="disable reshaping (default: False)",
+    )
+    reshape_group.add_argument(
+        "--use-fly-back",
+        dest="reshape_mode",
+        action="store_const",
+        const="fly-back",
+        help="use fly-back method to reshape (default: False)",
+    )
+    reshape_group.add_argument(
+        "--known-shape",
+        dest="reshape_mode",
+        action="store_const",
+        const="known",
+        help="use a known scan shape to reshape (default: False)",
+    )
+    parser.set_defaults(reshape_mode="auto")
+
+    # other optional arguments
+    parser.add_argument(
+        "--scan-x",
+        type=int,
+        default=256,
+        help="number of pixels in x (columns) (default: 256)",
+    )
+
+    parser.add_argument(
+        "--scan-y",
+        type=int,
+        default=256,
+        help="number of pixels in y (rows) (default: 256)",
+    )
+
+    parser.add_argument(
+        "--ibf",
+        action="store_true",
+        help="save integrated bright-field image",
+    )
+
+    parser.add_argument(
+        "--bin-sig-factor",
+        type=int,
+        default=4,
+        help=("the pixel binning factor in the signal dimensions, 0 for no "
+              "binning (default: 4)"),
+    )
+
+    parser.add_argument(
+        "--bin-nav-factor",
+        type=int,
+        default=4,
+        help=("the pixel binning factor in the navigation dimensions, 0 for no "
+              "binning (default: 4)"),
+    )
+
+    parser.add_argument(
+        "--create-json",
+        action="store_true",
+        help="create a PtyREX JSON config file",
+    )
+
+    parser.add_argument(
+        "--ptycho-config",
+        type=str,
+        default="pty_recon",
+        help="the name of the PtyREX JSON config file (default: 'pty_recon')",
+    )
+
+    parser.add_argument(
+        "--ptycho-template",
+        type=str,
+        default="./UserExampleJson.json",
+        help=("the path of the template PtyREX JSON config file "
+              "(default: './UserExampleJson.json')"),
+    )
+
+    return parser.parse_args()
+
 def _add_crosses(a):
     """
     Adds 3 pixel buffer cross to quad chip data.
