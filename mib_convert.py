@@ -1,3 +1,4 @@
+import argparse
 from itertools import product
 import json
 import logging
@@ -47,6 +48,111 @@ PIXEL_DEPTH_NPY_TYPE_PROMOTED = {"U01": np.uint8,
                                  "U32": np.uint64,
                                  "U64": np.uint64,
                                  }
+
+def parse_args():
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(description="Convert MIB files to hdf5")
+
+    # required arguments
+    parser.add_argument(
+        "--mib-path",
+        type=str,
+        required=True,
+        help="path to the MIB file",
+    )
+
+    # mutually exclusive reshaping options
+    reshape_group = parser.add_mutually_exclusive_group()
+    reshape_group.add_argument(
+        "--auto-reshape",
+        dest="reshape_mode",
+        action="store_const",
+        const="auto",
+        help="enable auto reshaping (default: True)",
+    )
+    reshape_group.add_argument(
+        "--no-reshaping",
+        dest="reshape_mode",
+        action="store_const",
+        const="no-reshape",
+        help="disable reshaping (default: False)",
+    )
+    reshape_group.add_argument(
+        "--use-fly-back",
+        dest="reshape_mode",
+        action="store_const",
+        const="fly-back",
+        help="use fly-back method to reshape (default: False)",
+    )
+    reshape_group.add_argument(
+        "--known-shape",
+        dest="reshape_mode",
+        action="store_const",
+        const="known",
+        help="use a known scan shape to reshape (default: False)",
+    )
+    parser.set_defaults(reshape_mode="auto")
+
+    # other optional arguments
+    parser.add_argument(
+        "--scan-x",
+        type=int,
+        default=256,
+        help="number of pixels in x (columns) (default: 256)",
+    )
+
+    parser.add_argument(
+        "--scan-y",
+        type=int,
+        default=256,
+        help="number of pixels in y (rows) (default: 256)",
+    )
+
+    parser.add_argument(
+        "--ibf",
+        action="store_true",
+        help="save integrated bright-field image",
+    )
+
+    parser.add_argument(
+        "--bin-sig-factor",
+        type=int,
+        default=4,
+        help=("the pixel binning factor in the signal dimensions, 0 for no "
+              "binning (default: 4)"),
+    )
+
+    parser.add_argument(
+        "--bin-nav-factor",
+        type=int,
+        default=4,
+        help=("the pixel binning factor in the navigation dimensions, 0 for no "
+              "binning (default: 4)"),
+    )
+
+    parser.add_argument(
+        "--create-json",
+        action="store_true",
+        help="create a PtyREX JSON config file",
+    )
+
+    parser.add_argument(
+        "--ptycho-config",
+        type=str,
+        default="pty_recon",
+        help="the name of the PtyREX JSON config file (default: 'pty_recon')",
+    )
+
+    parser.add_argument(
+        "--ptycho-template",
+        type=str,
+        default="./UserExampleJson.json",
+        help=("the path of the template PtyREX JSON config file "
+              "(default: './UserExampleJson.json')"),
+    )
+
+    return parser.parse_args()
+
 def _add_crosses(a):
     """
     Adds 3 pixel buffer cross to quad chip data.
@@ -558,38 +664,36 @@ def Meta2Config(acc,nCL,aps):
 
 
 def main():
-    args = json.loads(sys.argv[1])
+    args = parse_args()
 
-    mib_path = args['mib_path']
-    auto_reshape = args['auto_reshape']
-    no_reshaping = args['no_reshaping']
-    use_fly_back = args['use_fly_back']
-    known_shape = args['known_shape']
-    Scan_X = args['Scan_X']
-    Scan_Y = args['Scan_Y']
-    iBF = args['iBF']
-    bin_sig_flag = args['bin_sig_flag']
-    bin_sig_factor = args['bin_sig_factor']
-    bin_nav_flag = args['bin_nav_flag']
-    bin_nav_factor = args['bin_nav_factor']
-    create_json = args['create_json']
-    ptycho_config = args['ptycho_config']
-    ptycho_template = args['ptycho_template']
+    mib_path = args.mib_path
 
-    # info_path = sys.argv[1]
-    # index = int(sys.argv[2])
-    # info = {}
-    # with open(info_path, 'r') as f:
-        # for line in f:
-            # tmp = line.split(" ")
-            # if tmp[0] == 'to_convert_paths':
-                # info[tmp[0]] = line.split(" = ")[1].split('\n')[:-1]
-                # print(tmp[0], line.split(" = ")[1].split('\n')[:-1])
-            # else:
-                # info[tmp[0]] = tmp[-1].split("\n")[0]
-                # print(tmp[0], tmp[-1].split("\n")[0])
+    auto_reshape = False
+    no_reshaping = False
+    use_fly_back = False
+    known_shape = False
+    match args.reshape_mode:
+        case "auto":
+            auto_reshape = True
+        case "no-reshape":
+            no_reshaping = True
+        case "fly-back":
+            use_fly_back = True
+        case "known":
+            known_shape = True
+        case _:
+            raise ValueError(f"Unrecognised reshape mode {args.reshape_mode}")
 
-    # mib_path = eval(info['to_convert_paths'][0])[index]
+    Scan_X = args.scan_x
+    Scan_Y = args.scan_y
+    iBF = args.ibf
+    bin_sig_flag = bool(args.bin_sig_factor)
+    bin_sig_factor = args.bin_sig_factor
+    bin_nav_flag = bool(args.bin_nav_factor)
+    bin_nav_factor = args.bin_nav_factor
+    create_json = args.create_json
+    ptycho_config = args.ptycho_config
+    ptycho_template = args.ptycho_template
 
     adr_split = mib_path.split('/')
     tmp_save = []
@@ -619,20 +723,10 @@ def main():
     bin_nav_path = os.path.join(save_path, f'{time_stamp}_data_bin_nav_factor_{bin_nav_factor}.hspy')
     bin_sig_path = os.path.join(save_path, f'{time_stamp}_data_bin_sig_factor_{bin_sig_factor}.hspy')
 
-
     # check provided reshaping options
     print('**********')
-    print(no_reshaping, use_fly_back, known_shape)
+    print(auto_reshape, no_reshaping, use_fly_back, known_shape)
     print('**********')
-
-    # check provided reshaping options
-    if sum([bool(auto_reshape), bool(no_reshaping), bool(use_fly_back), bool(known_shape)]) != 1:
-        msg = (f"Only one of the options 'auto_reshape' ({auto_reshape}), "
-               f"'no_reshaping' ({no_reshaping}), or "
-               f"'use_fly_back' ({use_fly_back}) or 'known_shape' "
-               f"({known_shape}) should be True.")
-        raise ValueError(msg)
-
 
     # the Blosc filter registered ID (for h5py)
     compression_id = 32001
@@ -1164,16 +1258,6 @@ def main():
                 nCL = meta_values['nominal_camera_length(m)'][()]
                 aps = meta_values['aperture_size'][()]
             rot_angle,camera_length,conv_angle = Meta2Config(acc, nCL, aps)
-
-            if ptycho_config == '':
-                config_name = 'pty_recon'
-            else:
-                config_name = ptycho_config
-
-            if ptycho_template == '':
-                template_path = './UserExampleJson.json'
-            else:
-                template_path = ptycho_template
 
             gen_config(template_path, pty_dest_2, config_name, save_path +'/'+time_stamp+'.hdf', rot_angle, camera_length, 2*conv_angle)
 
