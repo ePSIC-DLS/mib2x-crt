@@ -664,38 +664,36 @@ def Meta2Config(acc,nCL,aps):
 
 
 def main():
-    args = json.loads(sys.argv[1])
+    args = parse_args()
 
-    mib_path = args['mib_path']
-    auto_reshape = args['auto_reshape']
-    no_reshaping = args['no_reshaping']
-    use_fly_back = args['use_fly_back']
-    known_shape = args['known_shape']
-    Scan_X = args['Scan_X']
-    Scan_Y = args['Scan_Y']
-    iBF = args['iBF']
-    bin_sig_flag = args['bin_sig_flag']
-    bin_sig_factor = args['bin_sig_factor']
-    bin_nav_flag = args['bin_nav_flag']
-    bin_nav_factor = args['bin_nav_factor']
-    create_json = args['create_json']
-    ptycho_config = args['ptycho_config']
-    ptycho_template = args['ptycho_template']
+    mib_path = args.mib_path
 
-    # info_path = sys.argv[1]
-    # index = int(sys.argv[2])
-    # info = {}
-    # with open(info_path, 'r') as f:
-        # for line in f:
-            # tmp = line.split(" ")
-            # if tmp[0] == 'to_convert_paths':
-                # info[tmp[0]] = line.split(" = ")[1].split('\n')[:-1]
-                # print(tmp[0], line.split(" = ")[1].split('\n')[:-1])
-            # else:
-                # info[tmp[0]] = tmp[-1].split("\n")[0]
-                # print(tmp[0], tmp[-1].split("\n")[0])
+    auto_reshape = False
+    no_reshaping = False
+    use_fly_back = False
+    known_shape = False
+    match args.reshape_mode:
+        case "auto":
+            auto_reshape = True
+        case "no-reshape":
+            no_reshaping = True
+        case "fly-back":
+            use_fly_back = True
+        case "known":
+            known_shape = True
+        case _:
+            raise ValueError(f"Unrecognised reshape mode {args.reshape_mode}")
 
-    # mib_path = eval(info['to_convert_paths'][0])[index]
+    Scan_X = args.scan_x
+    Scan_Y = args.scan_y
+    iBF = args.ibf
+    bin_sig_flag = bool(args.bin_sig_factor)
+    bin_sig_factor = args.bin_sig_factor
+    bin_nav_flag = bool(args.bin_nav_factor)
+    bin_nav_factor = args.bin_nav_factor
+    create_json = args.create_json
+    ptycho_config = args.ptycho_config
+    ptycho_template = args.ptycho_template
 
     adr_split = mib_path.split('/')
     tmp_save = []
