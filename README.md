@@ -48,7 +48,7 @@ To perform the MIB conversion, you can do
 
 ```console
 podman run --rm -v <VISIT>:<VISIT> localhost/mib2x python mib_convert.py
-"$(cat request.json)"
+--mib-path <MIB_FILE> --auto-reshape --ibf --create-json
 ```
 
 The `-v` flag mounts the visit on the container. For example if you want to
@@ -56,7 +56,9 @@ convert `.mib` file in `/dls/e02/data/2024/cm37231-4/`:
 
 ```console
 podman run --rm -v /dls/e02/data/2024/cm37231-4/:/dls/e02/data/2024/cm37231-4/
-localhost/mib2x python mib_convert.py "$(cat request.json)"
+localhost/mib2x python mib_convert.py --mib-path
+'/dls/e02/data/2024/cm37231-4/Merlin/WS2_n_fred_40um/20240821_150039/20240821_150035_data.mib'
+--auto-reshape --ibf --create-json
 ```
 
 If you want to run in debug mode, you can set the environment variable
@@ -64,26 +66,36 @@ If you want to run in debug mode, you can set the environment variable
 will save the output file under `<VISIT>/processing/debug/` instead of
 `<VISIT>/processing`.
 
-The script `mib_convert.py` takes a single argument which is a json blob
-with all the necessary information. The above `request.json` file could look
-like:
+For a full list of options, please refer to
 
-```json
-{
-  "mib_path": "/dls/e02/data/2024/cm37231-4/Merlin/WS2_n_fred_40um/20240821_150039/20240821_150035_data.mib",
-  "auto_reshape": 1,
-  "no_reshaping": 0,
-  "use_fly_back": 0,
-  "known_shape": 0,
-  "Scan_X": 256,
-  "Scan_Y": 256,
-  "iBF": 1,
-  "bin_sig_flag": 1,
-  "bin_sig_factor": 4,
-  "bin_nav_flag": 1,
-  "bin_nav_factor": 4,
-  "create_json": 1,
-  "ptycho_config": "",
-  "ptycho_template": ""
-}
+```console
+podman run --rm localhost/mib2x python mib_convert.py --help
+```
+
+```text
+usage: mib_arg_parser.py [-h] --mib-path MIB_PATH [--auto-reshape | --no-reshaping | --use-fly-back | --known-shape] [--scan-x SCAN_X] [--scan-y SCAN_Y] [--ibf]
+                         [--bin-sig-factor BIN_SIG_FACTOR] [--bin-nav-factor BIN_NAV_FACTOR] [--create-json] [--ptycho-config PTYCHO_CONFIG]
+                         [--ptycho-template PTYCHO_TEMPLATE]
+
+Convert MIB files to hdf5
+
+options:
+  -h, --help            show this help message and exit
+  --mib-path MIB_PATH   path to the MIB file
+  --auto-reshape        enable auto reshaping (default: True)
+  --no-reshaping        disable reshaping (default: False)
+  --use-fly-back        use fly-back method to reshape (default: False)
+  --known-shape         use a known scan shape to reshape (default: False)
+  --scan-x SCAN_X       number of pixels in x (columns) (default: 256)
+  --scan-y SCAN_Y       number of pixels in y (rows) (default: 256)
+  --ibf                 save integrated bright-field image
+  --bin-sig-factor BIN_SIG_FACTOR
+                        the pixel binning factor in the signal dimensions, 0 for no binning (default: 4)
+  --bin-nav-factor BIN_NAV_FACTOR
+                        the pixel binning factor in the navigation dimensions, 0 for no binning (default: 4)
+  --create-json         create a PtyREX JSON config file
+  --ptycho-config PTYCHO_CONFIG
+                        the name of the PtyREX JSON config file (default: 'pty_recon')
+  --ptycho-template PTYCHO_TEMPLATE
+                        the path of the template PtyREX JSON config file (default: './UserExampleJson.json')
 ```
