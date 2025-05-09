@@ -39,6 +39,12 @@
     },
     "process": {
         "PIE": {
+            "MultiSlice": {
+                "S_distance": 2e-9,
+                "slices": 1,
+                "test": 1,
+                "type": "phase"
+            },
             "decay": [
                 0.4,
                 0,
