@@ -14,6 +14,7 @@ RUN dnf install --disablerepo="*" \
     gcc \
     gcc-c++ \
     make \
+    cmake \
     wget \
     tar \
     zlib-devel \
@@ -29,44 +30,22 @@ RUN dnf install --disablerepo="*" \
 
 WORKDIR /opt
 
-RUN wget --quiet https://github.com/HDFGroup/hdf5/archive/refs/tags/hdf5-${HDF5_VERSION//./_}.tar.gz \
-    && gzip -cd hdf5-${HDF5_VERSION//./_}.tar.gz | tar xf - \
-    && mv hdf5-hdf5-${HDF5_VERSION//./_} hdf5-${HDF5_VERSION}
-
-# not sure how to disable examples in Autotools so just put them to /tmp and
-# they are not copied over, this is easier
-RUN cd hdf5-${HDF5_VERSION} \
-    && CFLAGS="-mavx2" \
-    ./configure \
-   --prefix=/usr/local \
-   --enable-build-mode=production \
-   --enable-shared \
-   --disable-static \
-   --disable-fortran \
-   --disable-cxx \
-   --disable-tools \
-   --disable-tests \
-   --with-examplesdir=/tmp && \
-   make -j$(nproc) && make install
-
-# CMake (need install) can disable examples, but the optimization level is not
-# high even this is Release, so not use it but worth keep it for later
-# investigation
-#RUN cd hdf5-${HDF5_VERSION} \
-    #&& mkdir -p build \
-    #&& cd build \
-    #&& cmake \
-    #-G "Unix Makefiles" \
-    #-DCMAKE_C_FLAGS:STRING="-mavx2" \
-    #-DCMAKE_INSTALL_PREFIX:STRING=/usr/local \
-    #-DZLIB_DIR:STRING=/usr/lib64/ \
-    #-DCMAKE_BUILD_TYPE:STRING=Release \
-    #-DBUILD_STATIC_LIBS:BOOL=OFF \
-    #-DHDF5_BUILD_TOOLS:BOOL=OFF \
-    #-DBUILD_TESTING:BOOL=OFF \
-    #-DHDF5_BUILD_EXAMPLES:BOOL=OFF \
-    #.. \
-    #&& make -j$(nproc) && make install
+RUN wget --quiet https://github.com/HDFGroup/hdf5/releases/download/hdf5_${HDF5_VERSION}/hdf5-${HDF5_VERSION}.tar.gz \
+    && gzip -cd hdf5-${HDF5_VERSION}.tar.gz | tar xf - \
+    && cd hdf5-${HDF5_VERSION} \
+    && mkdir -p build \
+    && cd build \
+    && cmake \
+    -G "Unix Makefiles" \
+    -DCMAKE_C_FLAGS:STRING="-mavx2 -O3" \
+    -DCMAKE_INSTALL_PREFIX:STRING=/usr/local \
+    -DCMAKE_BUILD_TYPE:STRING=Release \
+    -DBUILD_STATIC_LIBS:BOOL=OFF \
+    -DHDF5_BUILD_TOOLS:BOOL=OFF \
+    -DBUILD_TESTING:BOOL=OFF \
+    -DHDF5_BUILD_EXAMPLES:BOOL=OFF \
+    .. \
+    && make -j$(nproc) && make install
 
 # numpy without blas
 RUN git clone https://github.com/numpy/numpy.git \
