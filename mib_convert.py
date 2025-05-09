@@ -1259,7 +1259,7 @@ def main():
                 aps = meta_values['aperture_size'][()]
             rot_angle,camera_length,conv_angle = Meta2Config(acc, nCL, aps)
 
-            gen_config(template_path, pty_dest_2, config_name, save_path +'/'+time_stamp+'.hdf', rot_angle, camera_length, 2*conv_angle)
+            gen_config(ptycho_template, pty_dest_2, ptycho_config, save_path +'/'+time_stamp+'.hdf', rot_angle, camera_length, 2*conv_angle)
 
 
 if __name__ == "__main__":
