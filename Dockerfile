@@ -1,7 +1,7 @@
 FROM redhat/ubi8:latest as builder
 
 ENV PIP_NO_CACHE_DIR=1 \
-    HDF5_VERSION='1.14.3' \
+    HDF5_VERSION='1.14.6' \
     NUMPY_VERSION='2.1.1' \
     MIB_PROPS_VERSION='1.0.1'
 
