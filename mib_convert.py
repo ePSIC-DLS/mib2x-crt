@@ -995,8 +995,12 @@ def main():
                     # construct only the frame
                     arr = np.frombuffer(frame[header_size:], dtype=dtype_be)
 
+                    # convert from big-endian to little-endian
+                    arr_le = arr.byteswap()
+                    arr_le = arr_le.view(arr_le.dtype.newbyteorder())
+
                     # reshape to 2D for flipping
-                    resh = arr.reshape(det_y, det_x)
+                    resh = arr_le.reshape(det_y, det_x)
 
                     # flip it to match those from pyxem (but why?)
                     resh = np.flipud(resh)
